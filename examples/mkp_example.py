@@ -4,7 +4,9 @@ This example shows how to use problem file loading and custom fitness calculatio
 """
 
 from mso import MSO
+from mso.utils import save_results
 import numpy as np
+from pathlib import Path
 from dataclasses import dataclass
 from typing import List, Tuple
 
@@ -72,7 +74,7 @@ def main():
         neighbour_count=5,
         obj_func=calculate_mkp_fitness,
         load_problem_file=read_mkp_file,
-        gradient_strength=0.5,
+        gradient_strength=0.8,
         base_learning_rate=0.1,
         known_optimum=20.0,    # Known optimum değerini ekledik
         tolerance=1e-6,        # Tolerance değerini ekledik
@@ -95,6 +97,27 @@ def main():
     print(f"Best fitness: {best_fitness}")
     print(f"Known optimum: {optimizer.known_optimum}")
     print(f"Gap: {abs(best_fitness - optimizer.known_optimum) / optimizer.known_optimum * 100:.2f}%")
+    
+    # Save results
+    results = {
+        'best_fitness': best_fitness,
+        'best_solution': best_solution.tolist(),
+        'parameters': {
+            'pop_size': optimizer.pop_size,
+            'max_iter': optimizer.max_iter,
+            'obj_type': optimizer.obj_type,
+            'neighbour_count': optimizer.neighbour_count,
+            'gradient_strength': optimizer.gradient_strength,
+            'base_learning_rate': optimizer.base_learning_rate
+        },
+        'history': optimizer.history,
+        'known_optimum': optimizer.known_optimum,
+        'total_time': optimizer.history[-1]['time'] if optimizer.history else None
+    }
+    
+    output_dir = Path('results')
+    saved_file = save_results(results, output_dir, prefix='mkp_example')
+    print(f"\nResults saved to: {saved_file}")
     
 if __name__ == "__main__":
     main()
